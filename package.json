@@ -1,0 +1,6 @@
+{
+  "name": "k2s",
+  "description": "Integrate King of Times with Slack",
+  "main": "src/index.js",
+  "private": true
+}
