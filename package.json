@@ -1,6 +1,24 @@
 {
   "name": "k2s",
   "description": "Integrate King of Times with Slack",
-  "main": "src/index.js",
-  "private": true
+  "main": "dist/index.js",
+  "private": true,
+  "scripts": {
+    "start": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "@3846masa/axios-cookiejar-support": "^0.4.2",
+    "@slack/client": "^4.8.0",
+    "@types/form-data": "^2.2.1",
+    "form-data": "^2.3.3",
+    "jsdom": "^13.0.0",
+    "tough-cookie": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/jsdom": "^12.2.1",
+    "@types/slack-node": "^0.1.2",
+    "@types/tough-cookie": "^2.3.4",
+    "typescript": "^3.2.2"
+  }
 }

@@ -1,4 +1,0 @@
-/**
- * (c) Kohei Eguchi
- */
-
