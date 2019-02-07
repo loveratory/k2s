@@ -30,12 +30,12 @@ class KOT {
   private serverURL: string
   private topURL?: string
 
-  constructor (server = 'https://s3.kingtime.jp') {
+  constructor(server = 'https://s3.kingtime.jp') {
     this.jar = new tough.CookieJar()
     this.serverURL = server
   }
 
-  request (config: AxiosRequestConfig) {
+  request(config: AxiosRequestConfig) {
     return axios.request({
       ...config,
       jar: this.jar,
@@ -48,7 +48,7 @@ class KOT {
     })
   }
 
-  async signin (id: string, password: string) {
+  async signin(id: string, password: string) {
     const { data: signin } = await this.request({
       method: 'get',
       url: '/admin'
@@ -102,7 +102,7 @@ class KOT {
     throw new Error('Unexpected')
   }
 
-  async in () {
+  async in() {
     if (!this.topURL) throw new Error('Please login.')
 
     const { data } = await this.request({ url: this.topURL })
@@ -127,44 +127,44 @@ class KOT {
       .reduce((t, [el, _, date]) => {
         t[parseInt(date, 10)] = el
         return t
-      }, {} as {[k: string]: HTMLElement})
+      }, {} as { [k: string]: HTMLElement })
     const r = Object.entries(o)
       .map(([k, v]) => {
         // day, elem, timerecord
         return [k, v, v.querySelector('[data-ht-sort-index="START_TIMERECORD"] > p')] as [string, HTMLElement, HTMLElement?]
       })
-      .map(([k,v,e]): [string, HTMLElement, string?, string?] => {
+      .map(([k, v, e]): [string, HTMLElement, string?, string?] => {
         if (!e) throw new Error(`Unexpected...`)
 
         const s = e.querySelector('span')
-        if (!s) return [k,v]
+        if (!s) return [k, v]
 
         const type = s!.textContent as string
-        const [,time] = e.textContent!.split(type)
+        const [, time] = e.textContent!.split(type)
 
-        return [k,v,type.trim(),time.trim()]
+        return [k, v, type.trim(), time.trim()]
       })
-      .reduce((pv, [key,,type = null, time = null]) => {
+      .reduce((pv, [key, , type = null, time = null]) => {
         pv[key] = null
         if (type && time) pv[key] = [type, time]
         return pv
-      }, {} as {[k: string]: [string, string] | null})
+      }, {} as { [k: string]: [string, string] | null })
 
     return r
   }
 
-  async todayIn () {
+  async todayIn() {
     const d = await this.in()
     return d[(new Date()).getDate()]
   }
 }
 
 class WHConsole {
-  send (...args: any[]) { console.dir(args[0].attachments[0]) }
+  send(...args: any[]) { console.dir(args[0].attachments[0]) }
 }
 
-async function main () {
-  if (!Config.KOT.ID || !Config.KOT.Password) throw new Error(`Please give ID/PW of KOT.`)  
+async function main() {
+  if (!Config.KOT.ID || !Config.KOT.Password) throw new Error(`Please give ID/PW of KOT.`)
   const webhook = Config.Slack.IncomingWebhookURL ? new IncomingWebhook(Config.Slack.IncomingWebhookURL) : new WHConsole()
 
   const kot = new KOT()
@@ -173,20 +173,18 @@ async function main () {
   const todayIn = await kot.todayIn()
   if (todayIn) {
     const date = new Date()
-    const [h,m] = todayIn[1].split(':')
+    const [h, m] = todayIn[1].split(':')
     date.setHours(parseInt(h))
     date.setMinutes(parseInt(m))
-    const attachment = {
-      "fallback": `出社ed, ${todayIn[0]} ${todayIn[1]}`,
-      "color": "#7d449b",
-      "pretext": "出社ed",
-      "title": todayIn[0],
-      "ts": (date.getTime() / 1000).toString(),
-      "footer": "King of Time",
-      "footer_icon": "https://www.kingtime.jp/wp-content/themes/king-of-time/favicon.ico"
+
+    const ganbaruna = new Date(date)
+    ganbaruna.setHours(ganbaruna.getHours() + 9)
+
+    const body = {
+      "text": `出社ed @ ${todayIn[0]} ${todayIn[1]}. I recommend returing home before ${ganbaruna.getHours()}:${ganbaruna.getMinutes()}.`,
     }
 
-    webhook.send({ attachments: [attachment] })
+    webhook.send(body)
   }
 }
 
